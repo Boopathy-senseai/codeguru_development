@@ -1,80 +1,124 @@
-name: Code Review with CodeGuru and Comment Feedback
+# name: Code Review with CodeGuru and Comment Feedback
+
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     branches:
+#       - main
+
+# permissions:
+#   id-token: write
+#   security-events: write
+#   actions: read
+#   contents: read
+#   pull-requests: write  # Allows writing comments on PRs
+
+# jobs:
+#   code-review:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       # Step 1: Checkout the code
+#       - name: Checkout Repository
+#         uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0  # Ensure all history is fetched for analysis
+
+#       # Step 2: Configure AWS credentials for CodeGuru
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           role-to-assume: arn:aws:iam::325442430825:role/CodeGuruSecurityGitHubAccessRole
+#           aws-region: us-east-2
+#           role-session-name: GitHubActionScript
+
+#       # Step 3: Run CodeGuru Security Analysis
+#       - name: Run CodeGuru Security Analysis
+#         uses: aws-actions/codeguru-security@v1
+#         with:
+#           source_path: .  # Analyze the root source path
+#           aws_region: us-east-2
+#           fail_on_severity: Critical
+#           scan_name: CGS-Github-codeguru_development
+
+#       # Step 4: Check for SARIF Results and Prepare Comment
+#             # Step 4: Check for SARIF Results and Prepare Comment
+#       - name: Prepare SARIF Findings and Feedback
+#         if: always()
+#         run: |
+#           if [ -f codeguru-security-results.sarif.json ]; then
+#             FINDINGS_COUNT=$(jq '.runs[].results | length' codeguru-security-results.sarif.json)
+#             if [ "$FINDINGS_COUNT" -gt 0 ]; then
+#               COMMENT_CONTENT=$(jq -r '.runs[].results[] | select(.level == "error" or .level == "warning") | "- " + .message.text' codeguru-security-results.sarif.json)
+#               if [ -n "$COMMENT_CONTENT" ]; then
+#                 echo "### CodeGuru Security Analysis Results" > comment.md
+#                 echo "$COMMENT_CONTENT" >> comment.md
+#                 echo "Findings prepared for comment."
+#               else
+#                 echo "No critical or warning findings detected in the analysis."
+#               fi
+#             else
+#               echo "No findings were detected in the SARIF results."
+#             fi
+#           else
+#             echo "No SARIF file found; ensure the CodeGuru analysis ran properly."
+#           fi  # Close the outer if block
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#       # Step 5: Create or Update PR Comment
+#       - name: Create or Update PR Comment
+#         if: success() && github.event_name == 'pull_request' && steps.prepare-sarif-findings-and-feedback.outputs.comment-prepared == 'true'
+#         uses: peter-evans/create-or-update-comment@v2
+#         with:
+#           issue-number: ${{ github.event.pull_request.number }}
+#           body: |
+#             $(cat comment.md)
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+name: SonarQube Analysis
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
 
-permissions:
-  id-token: write
-  security-events: write
-  actions: read
-  contents: read
-  pull-requests: write  # Allows writing comments on PRs
-
 jobs:
-  code-review:
+  sonarQube:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Ensure all history is fetched for analysis
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      # Step 2: Configure AWS credentials for CodeGuru
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
         with:
-          role-to-assume: arn:aws:iam::325442430825:role/CodeGuruSecurityGitHubAccessRole
-          aws-region: us-east-2
-          role-session-name: GitHubActionScript
+          java-version: '11'
 
-      # Step 3: Run CodeGuru Security Analysis
-      - name: Run CodeGuru Security Analysis
-        uses: aws-actions/codeguru-security@v1
+      - name: Cache SonarQube Scanner
+        uses: actions/cache@v2
         with:
-          source_path: .  # Analyze the root source path
-          aws_region: us-east-2
-          fail_on_severity: Critical
-          scan_name: CGS-Github-codeguru_development
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar-cache
 
-      # Step 4: Check for SARIF Results and Prepare Comment
-            # Step 4: Check for SARIF Results and Prepare Comment
-      - name: Prepare SARIF Findings and Feedback
-        if: always()
-        run: |
-          if [ -f codeguru-security-results.sarif.json ]; then
-            FINDINGS_COUNT=$(jq '.runs[].results | length' codeguru-security-results.sarif.json)
-            if [ "$FINDINGS_COUNT" -gt 0 ]; then
-              COMMENT_CONTENT=$(jq -r '.runs[].results[] | select(.level == "error" or .level == "warning") | "- " + .message.text' codeguru-security-results.sarif.json)
-              if [ -n "$COMMENT_CONTENT" ]; then
-                echo "### CodeGuru Security Analysis Results" > comment.md
-                echo "$COMMENT_CONTENT" >> comment.md
-                echo "Findings prepared for comment."
-              else
-                echo "No critical or warning findings detected in the analysis."
-              fi
-            else
-              echo "No findings were detected in the SARIF results."
-            fi
-          else
-            echo "No SARIF file found; ensure the CodeGuru analysis ran properly."
-          fi  # Close the outer if block
+      - name: Run SonarQube Scan
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_CUBE }}
+        # run: |
+        #   sonar-scanner \
+        #     -Dsonar.projectKey=YOUR_PROJECT_KEY \
+        #     -Dsonar.sources=. \
+        #     -Dsonar.host.url=http://localhost:9000 \
+        #     -Dsonar.login=$SONAR_TOKEN
 
-      # Step 5: Create or Update PR Comment
-      - name: Create or Update PR Comment
-        if: success() && github.event_name == 'pull_request' && steps.prepare-sarif-findings-and-feedback.outputs.comment-prepared == 'true'
+      - name: Comment PR with SonarQube results
         uses: peter-evans/create-or-update-comment@v2
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            $(cat comment.md)
+            SonarQube analysis completed. Check results here: [SonarQube](http://localhost:9000/dashboard?id=YOUR_PROJECT_KEY)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
