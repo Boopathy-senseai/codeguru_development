@@ -90,47 +90,109 @@
 #         uses: github/codeql-action/upload-sarif@v2
 #         with:
 #           sarif_file: codeguru-security-results.sarif.json
-name: CodeGuru Security Example
+# name: CodeGuru Security Example
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# permissions:
+#   id-token: write
+#   security-events: write
+#   actions: read  # only required for workflows in private repositories
+#   contents: read
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0
+
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           role-to-assume: arn:aws:iam::325442430825:role/CodeGuruSecurityGitHubAccessRole
+#           aws-region: us-east-2
+#           role-session-name: GitHubActionScript
+
+#       - name: CodeGuru Security
+#         uses: aws-actions/codeguru-security@v1
+#         with:
+#           source_path: .
+#           aws_region: us-east-2
+#           fail_on_severity: Critical
+
+#       - name: Print Findings
+#         run: |
+#           ls -l
+#           cat codeguru-security-results.sarif.json
+
+#       - name: Upload Result
+#         uses: github/codeql-action/upload-sarif@v2
+#         with:
+#           sarif_file: codeguru-security-results.sarif.json
+name: Code Analysis and Comment
 
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - '**'  # This will trigger on PRs to any branch
 
-permissions:
-  id-token: write
-  security-events: write
-  actions: read  # only required for workflows in private repositories
-  contents: read
 jobs:
-  build:
+  analyze:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Fetch all history for accurate diffs
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          role-to-assume: arn:aws:iam::325442430825:role/CodeGuruSecurityGitHubAccessRole
-          aws-region: us-east-2
-          role-session-name: GitHubActionScript
+          node-version: '16'  # Specify your Node.js version
 
-      - name: CodeGuru Security
-        uses: aws-actions/codeguru-security@v1
-        with:
-          source_path: .
-          aws_region: us-east-2
-          fail_on_severity: Critical
+      - name: Install Dependencies
+        run: npm install  # Change to your project's package manager
 
-      - name: Print Findings
+      - name: Run Code Analysis
         run: |
-          ls -l
-          cat codeguru-security-results.sarif.json
+          # Add your code analysis command here, e.g., ESLint, SonarQube, etc.
+          npm run lint  # Example command, modify as needed
 
-      - name: Upload Result
-        uses: github/codeql-action/upload-sarif@v2
+      - name: Check for Code Differences
+        id: diff_check
+        run: |
+          git diff origin/main...HEAD > code_diff.txt || echo "No changes"
+          if [ -s code_diff.txt ]; then
+            echo "Code differences found. Check the 'code_diff.txt' file."
+            echo "::set-output name=has_diff::true"
+          else
+            echo "No differences found."
+            echo "::set-output name=has_diff::false"
+          fi
+
+      - name: Comment on Pull Request
+        if: github.event_name == 'pull_request' && steps.diff_check.outputs.has_diff == 'true'
+        uses: unsplash/comment-on-pr@v1
         with:
-          sarif_file: codeguru-security-results.sarif.json
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          comment: |
+            Code differences have been detected:
+            ```
+            $(cat code_diff.txt)
+            ```
+
+      - name: Upload Code Analysis Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: Code Differences
+          path: code_diff.txt
