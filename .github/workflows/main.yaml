@@ -152,36 +152,35 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Ensure all history is fetched for diff comparison
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.8'  # You can change this to the desired version
+          python-version: '3.8'  # Specify your desired Python version
 
       - name: Install Pylint
         run: |
-          pip install pylint  # Install Pylint
+          pip install pylint  # Install Pylint for code analysis
 
       - name: Run Pylint
         id: pylint
         run: |
-          pylint_output=$(pylint test.py || true)  # Capture Pylint output and ignore exit code
-          echo "$pylint_output" > pylint_results.txt  # Save results to a file
-          echo "::set-output name=pylint_output::$pylint_output"  # Save output for further use
-
+          pylint_output=$(pylint test.py || true)  # Analyze test.py and capture output
+          echo "$pylint_output" > pylint_results.txt  # Save Pylint results to a file
+          echo "::set-output name=pylint_output::$pylint_output"  # Save output for later use
 
       - name: Check for Code Differences
         id: diff_check
         run: |
-          git fetch origin main  # Fetch the latest main branch
-          git diff origin/main...HEAD > code_diff.txt || echo "No changes"
+          git fetch origin main  # Fetch the latest changes from the main branch
+          git diff origin/main...HEAD > code_diff.txt || echo "No changes"  # Compare differences
           if [ -s code_diff.txt ]; then
             echo "Code differences found. Check the 'code_diff.txt' file."
-            echo "::set-output name=has_diff::true"
+            echo "::set-output name=has_diff::true"  # Set output if differences exist
           else
             echo "No differences found."
-            echo "::set-output name=has_diff::false"
+            echo "::set-output name=has_diff::false"  # Set output if no differences
           fi
 
       - name: Comment on Pull Request
@@ -192,12 +191,16 @@ jobs:
           body: |
             Code differences have been detected:
             ```
-            $(cat code_diff.txt)
+            $(cat code_diff.txt)  # Display the code differences in the comment
+            ```
+            Pylint analysis results:
+            ```
+            ${{ steps.pylint.outputs.pylint_output }}  # Include Pylint results in the comment
             ```
 
       - name: Upload Pylint Results
-        if: always()
+        if: always()  # Always upload results regardless of success or failure
         uses: actions/upload-artifact@v3
         with:
           name: Pylint Results
-          path: pylint_results.txt
+          path: pylint_results.txt  # Upload Pylint results for reference
