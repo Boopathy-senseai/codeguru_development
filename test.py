@@ -1,2 +1,4 @@
 print("hai am devops engineer")
-print("hjfhdjshjdh")
+for i in range(4,8):
+    print(i)
+print("")
