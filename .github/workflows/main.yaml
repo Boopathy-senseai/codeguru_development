@@ -319,7 +319,7 @@ name: Code Review with CodeGuru and Comment Feedback
 on:
   push:
     branches:
-      - main # or specify branches as needed
+      - main 
 
 permissions:
   id-token: write 
@@ -375,7 +375,7 @@ jobs:
 
       # Step 5: Create or update the comment on the pull request
       - name: Create or Update PR Comment
-        if: success() && github.event_name == 'pull_request' && env.COMMENT_CONTENT != ""
+        if: success() && github.event_name == 'pull_request' && env.COMMENT_CONTENT != ''
         uses: peter-evans/create-or-update-comment@v2
         with:
           issue-number: ${{ github.event.pull_request.number }}
