@@ -44,6 +44,7 @@ jobs:
           scan_name: CGS-Github-codeguru_development
 
       # Step 4: Check for SARIF Results and Prepare Comment
+            # Step 4: Check for SARIF Results and Prepare Comment
       - name: Prepare SARIF Findings and Feedback
         if: always()
         run: |
@@ -63,6 +64,7 @@ jobs:
             fi
           else
             echo "No SARIF file found; ensure the CodeGuru analysis ran properly."
+          fi  # Close the outer if block
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
