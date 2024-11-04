@@ -68,7 +68,7 @@ jobs:
 
       # Step 5: Create or Update PR Comment
       - name: Create or Update PR Comment
-        if: success() && github.event_name == 'pull_request' && -f comment.md
+        if: success() && github.event_name == 'pull_request' && steps.prepare-sarif-findings-and-feedback.outputs.comment-prepared == 'true'
         uses: peter-evans/create-or-update-comment@v2
         with:
           issue-number: ${{ github.event.pull_request.number }}
