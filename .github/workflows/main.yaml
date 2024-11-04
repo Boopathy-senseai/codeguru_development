@@ -1,16 +1,16 @@
-name: CodeGuru Security Example
-on:
-  pull_request:
-    branches:
-      - 'main'
+# name: CodeGuru Security Example
+# on:
+#   pull_request:
+#     branches:
+#       - 'main'
 
 
-permissions:
-  id-token: write
-  security-events: write
-  # only required for workflows in private repositories
-  actions: read
-  contents: read
+# permissions:
+#   id-token: write
+#   security-events: write
+#   # only required for workflows in private repositories
+#   actions: read
+#   contents: read
 
 # jobs:
 #   build:
@@ -90,7 +90,18 @@ permissions:
 #         uses: github/codeql-action/upload-sarif@v2
 #         with:
 #           sarif_file: codeguru-security-results.sarif.json
+name: CodeGuru Security Example
+on:
+    branches:
+      - 'main'
 
+
+permissions:
+  id-token: write
+  security-events: write
+  # only required for workflows in private repositories
+  actions: read
+  contents: read
 jobs:
   build:
     runs-on: ubuntu-latest
