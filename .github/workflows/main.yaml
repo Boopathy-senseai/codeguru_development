@@ -204,12 +204,58 @@
 #         with:
 #           name: Pylint Results
 #           path: pylint_results.txt  # Upload Pylint results for reference
-name: Code Analysis with CodeGuru Security
+# name: Code Analysis with CodeGuru Security
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# permissions:
+#   id-token: write  # Required for assuming roles
+#   security-events: write  # For security events
+#   actions: read  # Required for workflows in private repositories
+#   contents: read  # To read repository contents
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0  # Ensure all history is fetched for analysis
+
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           role-to-assume: arn:aws:iam::325442430825:role/CodeGuruSecurityGitHubAccessRole
+#           aws-region: us-east-2
+#           role-session-name: GitHubActionScript
+
+#       - name: Run CodeGuru Security Analysis
+#         uses: aws-actions/codeguru-security@v1
+#         with:
+#           source_path: .  # Specify the source code path
+#           aws_region: us-east-2
+#           fail_on_severity: Critical  # Fail the build if critical issues are found
+
+#       - name: Print Findings
+#         run: |
+#           ls -l
+#           cat codeguru-security-results.sarif.json  # Display findings for review
+
+#       - name: Upload SARIF Results
+#         uses: github/codeql-action/upload-sarif@v2
+#         with:
+#           sarif_file: codeguru-security-results.sarif.json  # Upload the SARIF results
+name: Code Review with CodeGuru
 
 on:
-  push:
+  pull_request:
     branches:
-      - main
+      - main  # Trigger the action for pull requests targeting the main branch
 
 permissions:
   id-token: write  # Required for assuming roles
@@ -218,7 +264,7 @@ permissions:
   contents: read  # To read repository contents
 
 jobs:
-  build:
+  code-review:
     runs-on: ubuntu-latest
 
     steps:
@@ -245,6 +291,19 @@ jobs:
         run: |
           ls -l
           cat codeguru-security-results.sarif.json  # Display findings for review
+
+      - name: Comment on Pull Request
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ### CodeGuru Security Analysis Results
+            Here are the findings from the CodeGuru Security analysis:
+            ```json
+            $(cat codeguru-security-results.sarif.json)
+            ```
+            Please review the findings and address any critical issues.
 
       - name: Upload SARIF Results
         uses: github/codeql-action/upload-sarif@v2
