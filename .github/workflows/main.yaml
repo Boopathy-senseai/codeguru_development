@@ -1,16 +1,16 @@
-# name: CodeGuru Security Example
-# on:
-#   pull_request:
-#     branches:
-#       - 'main'
+name: CodeGuru Security Example
+on:
+  pull_request:
+    branches:
+      - 'main'
 
 
-# permissions:
-#   id-token: write
-#   security-events: write
-#   # only required for workflows in private repositories
-#   actions: read
-#   contents: read
+permissions:
+  id-token: write
+  security-events: write
+  # only required for workflows in private repositories
+  actions: read
+  contents: read
 
 # jobs:
 #   build:
