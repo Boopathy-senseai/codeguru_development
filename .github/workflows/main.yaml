@@ -104,8 +104,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y unzip wget
           
-          # Download SonarScanner (use the latest version available)
-          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/4.9.0.2991/sonar-scanner-cli-4.9.0.2991-linux.zip -O sonar-scanner.zip
+          # Download SonarScanner from GitHub
+          wget https://github.com/SonarSource/sonar-scanner-cli/releases/download/4.9.0.2991/sonar-scanner-cli-4.9.0.2991-linux.zip -O sonar-scanner.zip
           
           # Unzip the scanner
           unzip sonar-scanner.zip
@@ -114,6 +114,7 @@ jobs:
           sudo mv sonar-scanner-4.9.0.2991-linux/bin/sonar-scanner /usr/local/bin/
           sudo mv sonar-scanner-4.9.0.2991-linux/conf/sonar-scanner.properties /usr/local/bin/
           sudo mv sonar-scanner-4.9.0.2991-linux/lib /usr/local/lib/sonar-scanner
+
 
 
 
