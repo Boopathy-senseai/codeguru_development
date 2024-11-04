@@ -255,13 +255,13 @@ name: Code Review with CodeGuru
 on:
   pull_request:
     branches:
-      - main  # Trigger the action for pull requests targeting the main branch
+      - main 
 
 permissions:
-  id-token: write  # Required for assuming roles
-  security-events: write  # For security events
-  actions: read  # Required for workflows in private repositories
-  contents: read  # To read repository contents
+  id-token: write 
+  security-events: write 
+  actions: read  
+  contents: read 
 
 jobs:
   code-review:
