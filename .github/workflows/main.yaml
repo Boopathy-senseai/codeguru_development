@@ -107,12 +107,12 @@ jobs:
       - name: Run SonarQube Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_CUBE }}
-        # run: |
-        #   sonar-scanner \
-        #     -Dsonar.projectKey=YOUR_PROJECT_KEY \
-        #     -Dsonar.sources=. \
-        #     -Dsonar.host.url=http://localhost:9000 \
-        #     -Dsonar.login=$SONAR_TOKEN
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=YOUR_PROJECT_KEY \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=http://localhost:9000 \
+            -Dsonar.login=$SONAR_TOKEN
 
       - name: Comment PR with SonarQube results
         uses: peter-evans/create-or-update-comment@v2
