@@ -1,2 +1,2 @@
 print("sense7ai")
-print("zitaa")
+print("zitaai")
