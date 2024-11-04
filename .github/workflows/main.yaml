@@ -105,19 +105,20 @@ jobs:
 
       - name: Run SonarQube Scan
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_CUBE }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # Ensure this is set correctly in your GitHub secrets
         run: |
           sonar-scanner \
-            -Dsonar.projectKey=YOUR_PROJECT_KEY \
+            -Dsonar.projectKey=devops \  # Updated to your project key
             -Dsonar.sources=. \
             -Dsonar.host.url=http://localhost:9000 \
-            -Dsonar.login=$SONAR_CUBE
+            -Dsonar.login=$SONAR_TOKEN \
+            -Dsonar.language=py  # Specify Python as the language
 
       - name: Create or update PR comment with SonarQube results
         uses: peter-evans/create-or-update-comment@v2
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            SonarQube analysis completed. Check results here: [SonarQube](http://localhost:9000/dashboard?id=YOUR_PROJECT_KEY)
+            SonarQube analysis completed. Check results here: [SonarQube](http://localhost:9000/dashboard?id=devops)  # Updated link
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
