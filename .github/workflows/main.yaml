@@ -286,7 +286,7 @@ jobs:
         with:
           source_path: .  # Specify the source code path
           aws_region: us-east-2
-          fail_on_severity: Critical  # Fail the build if critical issues are found
+          fail_on_severity: Critical  
 
       - name: Print Findings
         run: |
