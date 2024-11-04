@@ -45,17 +45,51 @@
 #         uses: github/codeql-action/upload-sarif@v2
 #         with:
 #           sarif_file: codeguru-security-results.sarif.json
-name: CodeGuru Security Example
-on:
-  pull_request:
-    branches:
-      - 'main'
+# name: CodeGuru Security Example
+# on:
+#   pull_request:
+#     branches:
+#       - 'main'
 
-permissions:
-  id-token: write
-  security-events: write
-  actions: read
-  contents: read
+# permissions:
+#   id-token: write
+#   security-events: write
+#   actions: read
+#   contents: read
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0
+
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           role-to-assume: arn:aws:iam::325442430825:role/CodeGuruSecurityGitHubAccessRole
+#           aws-region: us-east-2
+#           role-session-name: GitHubActionScript
+#           audience: sts.amazonaws.com
+
+#       - name: CodeGuru Security
+#         uses: aws-actions/codeguru-security@v1
+#         with:
+#           source_path: .
+#           aws_region: us-east-2
+#           fail_on_severity: Critical
+      
+#       - name: Print findings
+#         run: |
+#           ls -l
+#           cat codeguru-security-results.sarif.json
+
+#       - name: Upload result
+#         uses: github/codeql-action/upload-sarif@v2
+#         with:
+#           sarif_file: codeguru-security-results.sarif.json
 
 jobs:
   build:
@@ -72,7 +106,6 @@ jobs:
           role-to-assume: arn:aws:iam::325442430825:role/CodeGuruSecurityGitHubAccessRole
           aws-region: us-east-2
           role-session-name: GitHubActionScript
-          audience: sts.amazonaws.com
 
       - name: CodeGuru Security
         uses: aws-actions/codeguru-security@v1
@@ -80,14 +113,13 @@ jobs:
           source_path: .
           aws_region: us-east-2
           fail_on_severity: Critical
-      
-      - name: Print findings
+
+      - name: Print Findings
         run: |
           ls -l
           cat codeguru-security-results.sarif.json
 
-      - name: Upload result
+      - name: Upload Result
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: codeguru-security-results.sarif.json
-
