@@ -98,17 +98,23 @@ jobs:
         with:
           python-version: '3.8'  # Specify your desired Python version
 
-      - name: Install dependencies
+      - name: Install SonarScanner
         run: |
-          python -m pip install --upgrade pip
-          pip install sonar-scanner
+          # Download SonarScanner
+          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/4.8.0.2856/sonar-scanner-cli-4.8.0.2856-linux.zip
+          # Unzip the scanner
+          unzip sonar-scanner-cli-4.8.0.2856-linux.zip
+          # Move the sonar-scanner to /usr/local/bin for global access
+          sudo mv sonar-scanner-4.8.0.2856-linux/bin/sonar-scanner /usr/local/bin/
+          sudo mv sonar-scanner-4.8.0.2856-linux/conf/sonar-scanner.properties /usr/local/bin/
+          sudo mv sonar-scanner-4.8.0.2856-linux/lib /usr/local/lib/sonar-scanner
 
       - name: Run SonarQube Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # Ensure this is set correctly in your GitHub secrets
         run: |
           sonar-scanner \
-            -Dsonar.projectKey=devops \  # Updated to your project key
+            -Dsonar.projectKey=devops \  # Your project key
             -Dsonar.sources=. \
             -Dsonar.host.url=http://localhost:9000 \
             -Dsonar.login=$SONAR_TOKEN \
