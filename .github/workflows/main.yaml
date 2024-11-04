@@ -375,7 +375,7 @@ jobs:
 
       # Step 5: Create or update the comment on the pull request
       - name: Create or Update PR Comment
-        if: success() && github.event_name == 'pull_request' && env.COMMENT_CONTENT != ""
+        if: success() && github.event_name == 'pull_request' && env.COMMENT_CONTENT != ''
         uses: peter-evans/create-or-update-comment@v2
         with:
           issue-number: ${{ github.event.pull_request.number }}
