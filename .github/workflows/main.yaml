@@ -317,8 +317,9 @@
 name: Code Review with CodeGuru and Comment Feedback
 
 on:
+  push:
     branches:
-      - main  # or specify branches as needed
+      - main # or specify branches as needed
 
 permissions:
   id-token: write 
