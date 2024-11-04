@@ -317,7 +317,6 @@
 name: Code Review with CodeGuru and Comment Feedback
 
 on:
-  pull_request:
     branches:
       - main  # or specify branches as needed
 
