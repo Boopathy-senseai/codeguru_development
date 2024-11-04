@@ -134,73 +134,119 @@
 #         uses: github/codeql-action/upload-sarif@v2
 #         with:
 #           sarif_file: codeguru-security-results.sarif.json
-name: Code Analysis and Comment
+# name: Code Analysis and Comment
+
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     branches:
+#       - '**'
+
+# jobs:
+#   analyze:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0  # Ensure all history is fetched for diff comparison
+
+#       - name: Set up Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: '3.8'  # Specify your desired Python version
+
+#       - name: Install Pylint
+#         run: |
+#           pip install pylint  # Install Pylint for code analysis
+
+#       - name: Run Pylint
+#         id: pylint
+#         run: |
+#           pylint_output=$(pylint test.py || true)  # Analyze test.py and capture output
+#           echo "$pylint_output" > pylint_results.txt  # Save Pylint results to a file
+#           echo "::set-output name=pylint_output::$pylint_output"  # Save output for later use
+
+#       - name: Check for Code Differences
+#         id: diff_check
+#         run: |
+#           git fetch origin main  # Fetch the latest changes from the main branch
+#           git diff origin/main...HEAD > code_diff.txt || echo "No changes"  # Compare differences
+#           if [ -s code_diff.txt ]; then
+#             echo "Code differences found. Check the 'code_diff.txt' file."
+#             echo "::set-output name=has_diff::true"  # Set output if differences exist
+#           else
+#             echo "No differences found."
+#             echo "::set-output name=has_diff::false"  # Set output if no differences
+#           fi
+
+#       - name: Comment on Pull Request
+#         if: github.event_name == 'pull_request' && steps.diff_check.outputs.has_diff == 'true'
+#         uses: peter-evans/create-or-update-comment@v2
+#         with:
+#           issue-number: ${{ github.event.pull_request.number }}
+#           body: |
+#             Code differences have been detected:
+#             ```
+#             $(cat code_diff.txt)  # Display the code differences in the comment
+#             ```
+#             Pylint analysis results:
+#             ```
+#             ${{ steps.pylint.outputs.pylint_output }}  # Include Pylint results in the comment
+#             ```
+
+#       - name: Upload Pylint Results
+#         if: always()  # Always upload results regardless of success or failure
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: Pylint Results
+#           path: pylint_results.txt  # Upload Pylint results for reference
+name: Code Analysis with CodeGuru Security
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - '**'
+
+permissions:
+  id-token: write  # Required for assuming roles
+  security-events: write  # For security events
+  actions: read  # Required for workflows in private repositories
+  contents: read  # To read repository contents
 
 jobs:
-  analyze:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Ensure all history is fetched for diff comparison
+          fetch-depth: 0  # Ensure all history is fetched for analysis
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          python-version: '3.8'  # Specify your desired Python version
+          role-to-assume: arn:aws:iam::325442430825:role/CodeGuruSecurityGitHubAccessRole
+          aws-region: us-east-2
+          role-session-name: GitHubActionScript
 
-      - name: Install Pylint
-        run: |
-          pip install pylint  # Install Pylint for code analysis
-
-      - name: Run Pylint
-        id: pylint
-        run: |
-          pylint_output=$(pylint test.py || true)  # Analyze test.py and capture output
-          echo "$pylint_output" > pylint_results.txt  # Save Pylint results to a file
-          echo "::set-output name=pylint_output::$pylint_output"  # Save output for later use
-
-      - name: Check for Code Differences
-        id: diff_check
-        run: |
-          git fetch origin main  # Fetch the latest changes from the main branch
-          git diff origin/main...HEAD > code_diff.txt || echo "No changes"  # Compare differences
-          if [ -s code_diff.txt ]; then
-            echo "Code differences found. Check the 'code_diff.txt' file."
-            echo "::set-output name=has_diff::true"  # Set output if differences exist
-          else
-            echo "No differences found."
-            echo "::set-output name=has_diff::false"  # Set output if no differences
-          fi
-
-      - name: Comment on Pull Request
-        if: github.event_name == 'pull_request' && steps.diff_check.outputs.has_diff == 'true'
-        uses: peter-evans/create-or-update-comment@v2
+      - name: Run CodeGuru Security Analysis
+        uses: aws-actions/codeguru-security@v1
         with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            Code differences have been detected:
-            ```
-            $(cat code_diff.txt)  # Display the code differences in the comment
-            ```
-            Pylint analysis results:
-            ```
-            ${{ steps.pylint.outputs.pylint_output }}  # Include Pylint results in the comment
-            ```
+          source_path: .  # Specify the source code path
+          aws_region: us-east-2
+          fail_on_severity: Critical  # Fail the build if critical issues are found
 
-      - name: Upload Pylint Results
-        if: always()  # Always upload results regardless of success or failure
-        uses: actions/upload-artifact@v3
+      - name: Print Findings
+        run: |
+          ls -l
+          cat codeguru-security-results.sarif.json  # Display findings for review
+
+      - name: Upload SARIF Results
+        uses: github/codeql-action/upload-sarif@v2
         with:
-          name: Pylint Results
-          path: pylint_results.txt  # Upload Pylint results for reference
+          sarif_file: codeguru-security-results.sarif.json  # Upload the SARIF results
