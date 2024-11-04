@@ -157,18 +157,22 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.8'  # Specify the Python version you want to use
+          python-version: '3.8'  # You can change this to the desired version
 
-
-
-      - name: Run Code Analysis
+      - name: Install Pylint
         run: |
-          # Replace `your_code_analysis_tool` with the actual tool you want to use (e.g., flake8, pylint, etc.)
-          your_code_analysis_tool .  # Run code analysis on your project directory
+          pip install pylint  # Install Pylint
+
+      - name: Run Pylint
+        run: |
+          pylint test.py  # Run Pylint on your test.py file
+          pylint_output=$(pylint test.py)  # Capture Pylint output
+          echo "$pylint_output" > pylint_results.txt  # Save results to a file
 
       - name: Check for Code Differences
         id: diff_check
         run: |
+          git fetch origin main  # Fetch the latest main branch
           git diff origin/main...HEAD > code_diff.txt || echo "No changes"
           if [ -s code_diff.txt ]; then
             echo "Code differences found. Check the 'code_diff.txt' file."
@@ -189,9 +193,9 @@ jobs:
             $(cat code_diff.txt)
             ```
 
-      - name: Upload Code Analysis Results
+      - name: Upload Pylint Results
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: Code Differences
-          path: code_diff.txt
+          name: Pylint Results
+          path: pylint_results.txt
