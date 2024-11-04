@@ -262,6 +262,7 @@ permissions:
   security-events: write 
   actions: read  
   contents: read 
+  pull-requests: write
 
 jobs:
   code-review:
@@ -292,7 +293,7 @@ jobs:
           ls -l
           cat codeguru-security-results.sarif.json  # Display findings for review
 
-      - name: Comment on Pull Request
+            - name: Comment on Pull Request
         if: github.event_name == 'pull_request'
         uses: peter-evans/create-or-update-comment@v2
         with:
@@ -304,6 +305,9 @@ jobs:
             $(cat codeguru-security-results.sarif.json)
             ```
             Please review the findings and address any critical issues.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the default token for commenting
+
 
       - name: Upload SARIF Results
         uses: github/codeql-action/upload-sarif@v2
