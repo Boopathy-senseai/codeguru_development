@@ -79,7 +79,15 @@ jobs:
       - name: Get changed files
         id: get_changed_files
         run: |
-          files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          # Determine the base commit to compare against
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base_commit="${{ github.event.before }}"
+          else
+            base_commit="HEAD^"  # Compare against the previous commit
+          fi
+          
+          # Get the list of changed files
+          files=$(git diff --name-only $base_commit ${{ github.sha }})
           echo "Changed files: $files"
           echo "::set-output name=files::$files"
 
