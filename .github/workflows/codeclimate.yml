@@ -20,16 +20,23 @@ jobs:
         with:
           python-version: '3.8'  # Change to your project's Python version
 
-
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt  # Install your project dependencies
 
       - name: Install CodeClimate CLI
         run: |
           curl -L https://github.com/codeclimate/codeclimate/releases/latest/download/codeclimate-linux-amd64 -o codeclimate
-          chmod +x codeclimate
-          sudo mv codeclimate /usr/local/bin
+          chmod +x codeclimate  # Make it executable
+          sudo mv codeclimate /usr/local/bin/  # Move to bin directory
+
+      - name: Verify CodeClimate CLI
+        run: |
+          file /usr/local/bin/codeclimate  # Check if it's a valid executable
+          ls -l /usr/local/bin/codeclimate  # List the details of the file
 
       - name: Run CodeClimate analysis
         env:
-          CODECLIMATE_REPO_TOKEN: ${{ secrets.CODECLIMATE}}
+          CODECLIMATE_REPO_TOKEN: ${{ secrets.CODECLIMATE_REPO_TOKEN }}
         run: |
           codeclimate analyze  # Run the analysis
