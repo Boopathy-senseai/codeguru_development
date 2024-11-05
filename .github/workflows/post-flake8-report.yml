@@ -79,14 +79,21 @@ jobs:
       - name: Get changed files
         id: get_changed_files
         run: |
-          echo "::set-output name=files::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})"
+          files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          echo "Changed files: $files"
+          echo "::set-output name=files::$files"
 
       - name: Run flake8 on changed files
         run: |
           if [ -z "${{ steps.get_changed_files.outputs.files }}" ]; then
-            echo "No changes detected."
+            echo "No changes detected. Creating an empty flake8 report."
+            echo '{}' > flake8-report.json  # Create an empty JSON report
           else
             flake8 ${{ steps.get_changed_files.outputs.files }} --output-file=flake8-report.json || true
+            if [ ! -f flake8-report.json ]; then
+              echo "No flake8 errors found. Creating an empty report."
+              echo '{}' > flake8-report.json  # Create an empty JSON report if no file was created
+            fi
           fi
 
       - name: Debug Event Context
