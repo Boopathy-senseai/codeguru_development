@@ -1,0 +1,35 @@
+name: CodeClimate Analysis
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  codeclimate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'  # Change to your project's Python version
+
+
+
+      - name: Install CodeClimate CLI
+        run: |
+          curl -L https://github.com/codeclimate/codeclimate/releases/latest/download/codeclimate-linux-amd64 -o codeclimate
+          chmod +x codeclimate
+          sudo mv codeclimate /usr/local/bin
+
+      - name: Run CodeClimate analysis
+        env:
+          CODECLIMATE_REPO_TOKEN: ${{ secrets.CODECLIMATE}}
+        run: |
+          codeclimate analyze  # Run the analysis
