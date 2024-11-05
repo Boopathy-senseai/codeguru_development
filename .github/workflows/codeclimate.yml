@@ -26,7 +26,7 @@ jobs:
 
       - name: Install CodeClimate CLI
         run: |
-          curl -L https://github.com/codeclimate/codeclimate/releases/latest/download/codeclimate-linux-amd64 -o codeclimate
+          curl -L -o codeclimate https://github.com/codeclimate/codeclimate/releases/latest/download/codeclimate-linux-amd64
           chmod +x codeclimate  # Make it executable
           sudo mv codeclimate /usr/local/bin/  # Move to bin directory
 
@@ -34,7 +34,8 @@ jobs:
         run: |
           file /usr/local/bin/codeclimate  # Check if it's a valid executable
           ls -l /usr/local/bin/codeclimate  # List the details of the file
-          head -n 10 /usr/local/bin/codeclimate  # Check the first few lines of the executable for any anomalies
+          if [ ! -s /usr/local/bin/codeclimate ]; then echo "Downloaded file is empty."; exit 1; fi
+          if ! command -v codeclimate &> /dev/null; then echo "CodeClimate CLI not found in PATH"; exit 1; fi
 
       - name: Run CodeClimate analysis
         env:
