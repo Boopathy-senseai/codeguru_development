@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize]
 
+permissions:
+  issues: write
+  pull_requests: write
+
 jobs:
   post-flake8-report:
     runs-on: ubuntu-latest
