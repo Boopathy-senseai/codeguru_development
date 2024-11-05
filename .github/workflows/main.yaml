@@ -44,7 +44,6 @@ jobs:
           scan_name: CGS-Github-codeguru_development
 
       # Step 4: Check for SARIF Results and Prepare Comment
-            # Step 4: Check for SARIF Results and Prepare Comment
       - name: Prepare SARIF Findings and Feedback
         id: prepare_comment
         if: always()

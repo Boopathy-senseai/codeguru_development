@@ -6810,17 +6810,7 @@ class career_job_view_api(generics.GenericAPIView):
             + " - "
             + str(jd_form.job_id)
         )
-        try:
-            notify.send(
-                client_id,
-                recipient=client_id,
-                verb=data,
-                description="applicant",
-                target=emp_id,
-                action_object=jd_form,
-            )
-        except:
-            pass
+        
         messages.success(request, "test")
         try:
             career_page_url = career_page_setting.objects.get(
