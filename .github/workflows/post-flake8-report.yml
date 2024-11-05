@@ -3,10 +3,7 @@ name: Post flake8 Report
 on:
   pull_request:
     types: [opened, synchronize]
-
-permissions:
-  issues: write
-  pull_requests: write
+  workflow_dispatch: # Allows for manual triggering
 
 jobs:
   post-flake8-report:
@@ -14,6 +11,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: List files
+        run: ls -al
 
       - name: Install Python and flake8
         uses: actions/setup-python@v4
