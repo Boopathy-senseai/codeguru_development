@@ -10,7 +10,7 @@ on:
 
 permissions:
   issues: write
-  pull_requests: write
+  pull-requests: write  # Corrected to pull-requests (with a hyphen)
 
 jobs:
   post-flake8-report:
