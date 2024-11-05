@@ -34,9 +34,10 @@ jobs:
         run: |
           file /usr/local/bin/codeclimate  # Check if it's a valid executable
           ls -l /usr/local/bin/codeclimate  # List the details of the file
+          head -n 10 /usr/local/bin/codeclimate  # Check the first few lines of the executable for any anomalies
 
       - name: Run CodeClimate analysis
         env:
-          CODECLIMATE_REPO_TOKEN: ${{ secrets.CODECLIMATE }}
+          CODECLIMATE_REPO_TOKEN: ${{ secrets.CODECLIMATE_REPO_TOKEN }}  # Ensure this secret is set correctly
         run: |
           codeclimate analyze  # Run the analysis
