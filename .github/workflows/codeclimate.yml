@@ -27,6 +27,7 @@ jobs:
       - name: Install CodeClimate CLI
         run: |
           curl -L -o codeclimate https://github.com/codeclimate/codeclimate/releases/latest/download/codeclimate-linux-amd64
+          if [[ "$(file codeclimate)" != *"executable"* ]]; then echo "Downloaded file is not executable"; exit 1; fi
           chmod +x codeclimate  # Make it executable
           sudo mv codeclimate /usr/local/bin/  # Move to bin directory
 
