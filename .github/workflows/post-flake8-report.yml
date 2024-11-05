@@ -1,8 +1,12 @@
 name: Post flake8 Report
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
-    types: [opened, synchronize]
+    branches:
+      - main
 
 permissions:
   issues: write
