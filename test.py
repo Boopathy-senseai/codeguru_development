@@ -18,3 +18,4 @@ print(f'{n} label reshufflings produced only {count} instances with a difference
 print(f'at least as extreme as the observed difference of {observed_diff:.1f}.')
 print(f'The one-sided p-value of {count / n:.4f} leads us to reject the null')
 print(f'hypothesis that there is no difference between the drug and the placebo.')
+print("am a cloud engineer")
