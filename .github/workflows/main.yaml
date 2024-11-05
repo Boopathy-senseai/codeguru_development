@@ -1,331 +1,18 @@
-# name: CodeGuru Security Example
-# on:
-#   pull_request:
-#     branches:
-#       - 'main'
-
-
-# permissions:
-#   id-token: write
-#   security-events: write
-#   # only required for workflows in private repositories
-#   actions: read
-#   contents: read
-
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout Respository
-#         uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0
-
-#       - name: Configure aws credentials
-#         uses: aws-actions/configure-aws-credentials@v2
-#         with:
-#           role-to-assume: arn:aws:iam::325442430825:role/CodeGuruSecurityGitHubAccessRole
-#           aws-region: us-east-2
-#           role-session-name: GitHubActionScript
-
-#       - name: CodeGuru Security
-#         uses: aws-actions/codeguru-security@v1
-#         with:
-#           source_path: .
-#           aws_region: us-east-2
-#           fail_on_severity: Critical
-#       - name: Print findings
-#         run: |
-#           ls -l
-#           cat codeguru-security-results.sarif.json
-
-#       # If you want content in security scanning, you’ll need to enable codescanning by going into github.
-#       # https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning-for-a-repository
-#       - name: Upload result
-#         uses: github/codeql-action/upload-sarif@v2
-#         with:
-#           sarif_file: codeguru-security-results.sarif.json
-# name: CodeGuru Security Example
-# on:
-#   pull_request:
-#     branches:
-#       - 'main'
-
-# permissions:
-#   id-token: write
-#   security-events: write
-#   actions: read
-#   contents: read
-
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout Repository
-#         uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0
-
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v2
-#         with:
-#           role-to-assume: arn:aws:iam::325442430825:role/CodeGuruSecurityGitHubAccessRole
-#           aws-region: us-east-2
-#           role-session-name: GitHubActionScript
-#           audience: sts.amazonaws.com
-
-#       - name: CodeGuru Security
-#         uses: aws-actions/codeguru-security@v1
-#         with:
-#           source_path: .
-#           aws_region: us-east-2
-#           fail_on_severity: Critical
-      
-#       - name: Print findings
-#         run: |
-#           ls -l
-#           cat codeguru-security-results.sarif.json
-
-#       - name: Upload result
-#         uses: github/codeql-action/upload-sarif@v2
-#         with:
-#           sarif_file: codeguru-security-results.sarif.json
-# name: CodeGuru Security Example
-
-# on:
-#   push:
-#     branches:
-#       - main
-
-# permissions:
-#   id-token: write
-#   security-events: write
-#   actions: read  # only required for workflows in private repositories
-#   contents: read
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout Repository
-#         uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0
-
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v2
-#         with:
-#           role-to-assume: arn:aws:iam::325442430825:role/CodeGuruSecurityGitHubAccessRole
-#           aws-region: us-east-2
-#           role-session-name: GitHubActionScript
-
-#       - name: CodeGuru Security
-#         uses: aws-actions/codeguru-security@v1
-#         with:
-#           source_path: .
-#           aws_region: us-east-2
-#           fail_on_severity: Critical
-
-#       - name: Print Findings
-#         run: |
-#           ls -l
-#           cat codeguru-security-results.sarif.json
-
-#       - name: Upload Result
-#         uses: github/codeql-action/upload-sarif@v2
-#         with:
-#           sarif_file: codeguru-security-results.sarif.json
-# name: Code Analysis and Comment
-
-# on:
-#   push:
-#     branches:
-#       - main
-#   pull_request:
-#     branches:
-#       - '**'
-
-# jobs:
-#   analyze:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout Repository
-#         uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0  # Ensure all history is fetched for diff comparison
-
-#       - name: Set up Python
-#         uses: actions/setup-python@v4
-#         with:
-#           python-version: '3.8'  # Specify your desired Python version
-
-#       - name: Install Pylint
-#         run: |
-#           pip install pylint  # Install Pylint for code analysis
-
-#       - name: Run Pylint
-#         id: pylint
-#         run: |
-#           pylint_output=$(pylint test.py || true)  # Analyze test.py and capture output
-#           echo "$pylint_output" > pylint_results.txt  # Save Pylint results to a file
-#           echo "::set-output name=pylint_output::$pylint_output"  # Save output for later use
-
-#       - name: Check for Code Differences
-#         id: diff_check
-#         run: |
-#           git fetch origin main  # Fetch the latest changes from the main branch
-#           git diff origin/main...HEAD > code_diff.txt || echo "No changes"  # Compare differences
-#           if [ -s code_diff.txt ]; then
-#             echo "Code differences found. Check the 'code_diff.txt' file."
-#             echo "::set-output name=has_diff::true"  # Set output if differences exist
-#           else
-#             echo "No differences found."
-#             echo "::set-output name=has_diff::false"  # Set output if no differences
-#           fi
-
-#       - name: Comment on Pull Request
-#         if: github.event_name == 'pull_request' && steps.diff_check.outputs.has_diff == 'true'
-#         uses: peter-evans/create-or-update-comment@v2
-#         with:
-#           issue-number: ${{ github.event.pull_request.number }}
-#           body: |
-#             Code differences have been detected:
-#             ```
-#             $(cat code_diff.txt)  # Display the code differences in the comment
-#             ```
-#             Pylint analysis results:
-#             ```
-#             ${{ steps.pylint.outputs.pylint_output }}  # Include Pylint results in the comment
-#             ```
-
-#       - name: Upload Pylint Results
-#         if: always()  # Always upload results regardless of success or failure
-#         uses: actions/upload-artifact@v3
-#         with:
-#           name: Pylint Results
-#           path: pylint_results.txt  # Upload Pylint results for reference
-# name: Code Analysis with CodeGuru Security
-
-# on:
-#   push:
-#     branches:
-#       - main
-
-# permissions:
-#   id-token: write  # Required for assuming roles
-#   security-events: write  # For security events
-#   actions: read  # Required for workflows in private repositories
-#   contents: read  # To read repository contents
-
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout Repository
-#         uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0  # Ensure all history is fetched for analysis
-
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v2
-#         with:
-#           role-to-assume: arn:aws:iam::325442430825:role/CodeGuruSecurityGitHubAccessRole
-#           aws-region: us-east-2
-#           role-session-name: GitHubActionScript
-
-#       - name: Run CodeGuru Security Analysis
-#         uses: aws-actions/codeguru-security@v1
-#         with:
-#           source_path: .  # Specify the source code path
-#           aws_region: us-east-2
-#           fail_on_severity: Critical  # Fail the build if critical issues are found
-
-#       - name: Print Findings
-#         run: |
-#           ls -l
-#           cat codeguru-security-results.sarif.json  # Display findings for review
-
-#       - name: Upload SARIF Results
-#         uses: github/codeql-action/upload-sarif@v2
-#         with:
-#           sarif_file: codeguru-security-results.sarif.json  # Upload the SARIF results
-# name: Code Review with CodeGuru
-
-# on:
-#   pull_request:
-#     branches:
-#       - main 
-
-
-# permissions:
-#   id-token: write 
-#   security-events: write 
-#   actions: read  
-#   contents: read 
-#   pull-requests: write
-
-# jobs:
-#   code-review:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout Repository
-#         uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0  # Ensure all history is fetched for analysis
-
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v2
-#         with:
-#           role-to-assume: arn:aws:iam::325442430825:role/CodeGuruSecurityGitHubAccessRole
-#           aws-region: us-east-2
-#           role-session-name: GitHubActionScript
-
-#       - name: Run CodeGuru Security Analysis
-#         uses: aws-actions/codeguru-security@v1
-#         with:
-#           source_path: .  # Specify the source code path
-#           aws_region: us-east-2
-#           fail_on_severity: Critical  
-
-#       - name: Print Findings
-#         run: |
-#           ls -l
-#           cat codeguru-security-results.sarif.json  # Display findings for review
-
-#             - name: Comment on Pull Request
-#         if: github.event_name == 'pull_request'
-#         uses: peter-evans/create-or-update-comment@v2
-#         with:
-#           issue-number: ${{ github.event.pull_request.number }}
-#           body: |
-#             ### CodeGuru Security Analysis Results
-#             Here are the findings from the CodeGuru Security analysis:
-#             ```json
-#             $(cat codeguru-security-results.sarif.json)
-#             ```
-#             Please review the findings and address any critical issues.
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the default token for commenting
-
-
-#       - name: Upload SARIF Results
-#         uses: github/codeql-action/upload-sarif@v2
-#         with:
-#           sarif_file: codeguru-security-results.sarif.json  # Upload the SARIF results
 name: Code Review with CodeGuru and Comment Feedback
 
 on:
   push:
     branches:
-      - main 
+      - main
+  pull_request:
+    branches:
+      - main
 
 permissions:
-  id-token: write 
-  security-events: write 
-  actions: read  
-  contents: read 
+  id-token: write
+  security-events: write
+  actions: read
+  contents: read
   pull-requests: write  # Allows writing comments on PRs
 
 jobs:
@@ -354,28 +41,39 @@ jobs:
           source_path: .  # Analyze the root source path
           aws_region: us-east-2
           fail_on_severity: Critical
+          scan_name: CGS-Github-codeguru_development
 
-      # Step 4: Comment on Pull Request with Findings
-      - name: Print Findings and Post Feedback
-        if: github.event_name == 'pull_request'
+      # Step 4: Check for SARIF Results and Prepare Comment
+            # Step 4: Check for SARIF Results and Prepare Comment
+      - name: Prepare SARIF Findings and Feedback
+        id: prepare_comment
+        if: always()
         run: |
           if [ -f codeguru-security-results.sarif.json ]; then
-            echo "Posting CodeGuru Security Analysis findings as a comment."
-            COMMENT_CONTENT=$(jq -r '.runs[].results[] | select(.level == "error" or .level == "warning") | .message.text' codeguru-security-results.sarif.json)
-            if [ -n "$COMMENT_CONTENT" ]; then
-              echo "### CodeGuru Security Analysis Results" > comment.md
-              echo "$COMMENT_CONTENT" >> comment.md
+            FINDINGS_COUNT=$(jq '.runs[].results | length' codeguru-security-results.sarif.json)
+            if [ "$FINDINGS_COUNT" -gt 0 ]; then
+              COMMENT_CONTENT=$(jq -r '.runs[].results[] | select(.level == "error" or .level == "warning") | "- " + .message.text' codeguru-security-results.sarif.json)
+              if [ -n "$COMMENT_CONTENT" ]; then
+                echo "### CodeGuru Security Analysis Results" > comment.md
+                echo "$COMMENT_CONTENT" >> comment.md
+                echo "comment-prepared=true" >> $GITHUB_ENV
+                echo "Findings prepared for comment."
+              else
+                echo "No critical or warning findings detected in the analysis."
+              fi
             else
-              echo "No critical or warning findings detected."
+              echo "No findings were detected in the SARIF results."
             fi
           else
-            echo "No SARIF file found."
+            echo "No SARIF file found; ensure the CodeGuru analysis ran properly."
+            echo "comment-prepared=false" >> $GITHUB_ENV
+          fi  # Added this fi to properly close the outermost if block
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Step 5: Create or update the comment on the pull request
+      # Step 5: Create or Update PR Comment
       - name: Create or Update PR Comment
-        if: success() && github.event_name == 'pull_request' && env.COMMENT_CONTENT != ''
+        if: env.comment-prepared == 'true' && github.event_name == 'pull_request'
         uses: peter-evans/create-or-update-comment@v2
         with:
           issue-number: ${{ github.event.pull_request.number }}
