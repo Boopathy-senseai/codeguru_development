@@ -1,124 +1,124 @@
-# name: Code Review with CodeGuru and Comment Feedback
-
-# on:
-#   push:
-#     branches:
-#       - main
-#   pull_request:
-#     branches:
-#       - main
-
-# permissions:
-#   id-token: write
-#   security-events: write
-#   actions: read
-#   contents: read
-#   pull-requests: write  # Allows writing comments on PRs
-
-# jobs:
-#   code-review:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       # Step 1: Checkout the code
-#       - name: Checkout Repository
-#         uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0  # Ensure all history is fetched for analysis
-
-#       # Step 2: Configure AWS credentials for CodeGuru
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v2
-#         with:
-#           role-to-assume: arn:aws:iam::325442430825:role/CodeGuruSecurityGitHubAccessRole
-#           aws-region: us-east-2
-#           role-session-name: GitHubActionScript
-
-#       # Step 3: Run CodeGuru Security Analysis
-#       - name: Run CodeGuru Security Analysis
-#         uses: aws-actions/codeguru-security@v1
-#         with:
-#           source_path: .  # Analyze the root source path
-#           aws_region: us-east-2
-#           fail_on_severity: Critical
-#           scan_name: CGS-Github-codeguru_development
-
-#       # Step 4: Check for SARIF Results and Prepare Comment
-#             # Step 4: Check for SARIF Results and Prepare Comment
-#       - name: Prepare SARIF Findings and Feedback
-#         if: always()
-#         run: |
-#           if [ -f codeguru-security-results.sarif.json ]; then
-#             FINDINGS_COUNT=$(jq '.runs[].results | length' codeguru-security-results.sarif.json)
-#             if [ "$FINDINGS_COUNT" -gt 0 ]; then
-#               COMMENT_CONTENT=$(jq -r '.runs[].results[] | select(.level == "error" or .level == "warning") | "- " + .message.text' codeguru-security-results.sarif.json)
-#               if [ -n "$COMMENT_CONTENT" ]; then
-#                 echo "### CodeGuru Security Analysis Results" > comment.md
-#                 echo "$COMMENT_CONTENT" >> comment.md
-#                 echo "Findings prepared for comment."
-#               else
-#                 echo "No critical or warning findings detected in the analysis."
-#               fi
-#             else
-#               echo "No findings were detected in the SARIF results."
-#             fi
-#           else
-#             echo "No SARIF file found; ensure the CodeGuru analysis ran properly."
-#           fi  # Close the outer if block
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-#       # Step 5: Create or Update PR Comment
-#       - name: Create or Update PR Comment
-#         if: success() && github.event_name == 'pull_request' && steps.prepare-sarif-findings-and-feedback.outputs.comment-prepared == 'true'
-#         uses: peter-evans/create-or-update-comment@v2
-#         with:
-#           issue-number: ${{ github.event.pull_request.number }}
-#           body: |
-#             $(cat comment.md)
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-name: SonarQube Analysis
+name: Code Review with CodeGuru and Comment Feedback
 
 on:
   push:
     branches:
-      - main  # or your default branch
+      - main
   pull_request:
     branches:
       - main
 
+permissions:
+  id-token: write
+  security-events: write
+  actions: read
+  contents: read
+  pull-requests: write  # Allows writing comments on PRs
+
 jobs:
-  sonarQube:
+  code-review:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      # Step 1: Checkout the code
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure all history is fetched for analysis
 
-      - name: Install SonarScanner
+      # Step 2: Configure AWS credentials for CodeGuru
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::325442430825:role/CodeGuruSecurityGitHubAccessRole
+          aws-region: us-east-2
+          role-session-name: GitHubActionScript
+
+      # Step 3: Run CodeGuru Security Analysis
+      - name: Run CodeGuru Security Analysis
+        uses: aws-actions/codeguru-security@v1
+        with:
+          source_path: .  # Analyze the root source path
+          aws_region: us-east-2
+          fail_on_severity: Critical
+          scan_name: CGS-Github-codeguru_development
+
+      # Step 4: Check for SARIF Results and Prepare Comment
+            # Step 4: Check for SARIF Results and Prepare Comment
+      - name: Prepare SARIF Findings and Feedback
+        if: always()
         run: |
-          # Install required dependencies
-          sudo apt-get update
-          sudo apt-get install -y unzip wget
-
-          # Download SonarScanner from GitHub
-          wget https://github.com/SonarSource/sonar-scanner-cli/releases/download/4.9.0.2991/sonar-scanner-cli-4.9.0.2991-linux.zip -O sonar-scanner.zip
-
-          # Unzip the scanner
-          unzip sonar-scanner.zip
-
-          # Move the sonar-scanner to /usr/local/bin for global access
-          sudo mv sonar-scanner-4.9.0.2991-linux/bin/sonar-scanner /usr/local/bin/
-          sudo mv sonar-scanner-4.9.0.2991-linux/conf/sonar-scanner.properties /usr/local/bin/
-          sudo mv sonar-scanner-4.9.0.2991-linux/lib /usr/local/lib/sonar-scanner
-
-      - name: Run SonarQube Scan
+          if [ -f codeguru-security-results.sarif.json ]; then
+            FINDINGS_COUNT=$(jq '.runs[].results | length' codeguru-security-results.sarif.json)
+            if [ "$FINDINGS_COUNT" -gt 0 ]; then
+              COMMENT_CONTENT=$(jq -r '.runs[].results[] | select(.level == "error" or .level == "warning") | "- " + .message.text' codeguru-security-results.sarif.json)
+              if [ -n "$COMMENT_CONTENT" ]; then
+                echo "### CodeGuru Security Analysis Results" > comment.md
+                echo "$COMMENT_CONTENT" >> comment.md
+                echo "Findings prepared for comment."
+              else
+                echo "No critical or warning findings detected in the analysis."
+              fi
+            else
+              echo "No findings were detected in the SARIF results."
+            fi
+          else
+            echo "No SARIF file found; ensure the CodeGuru analysis ran properly."
+          fi  # Close the outer if block
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_CUBE }}  # Your secret token
-        run: |
-          sonar-scanner \
-            -Dsonar.projectKey=devops \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=http://localhost:9000 \
-            -Dsonar.login=$SONAR_CUBE
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 5: Create or Update PR Comment
+      - name: Create or Update PR Comment
+        if: success() && github.event_name == 'pull_request' && steps.prepare-sarif-findings-and-feedback.outputs.comment-prepared == 'true'
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            $(cat comment.md)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+# name: SonarQube Analysis
+
+# on:
+#   push:
+#     branches:
+#       - main  # or your default branch
+#   pull_request:
+#     branches:
+#       - main
+
+# jobs:
+#   sonarQube:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       - name: Install SonarScanner
+#         run: |
+#           # Install required dependencies
+#           sudo apt-get update
+#           sudo apt-get install -y unzip wget
+
+#           # Download SonarScanner from GitHub
+#           wget https://github.com/SonarSource/sonar-scanner-cli/releases/download/4.9.0.2991/sonar-scanner-cli-4.9.0.2991-linux.zip -O sonar-scanner.zip
+
+#           # Unzip the scanner
+#           unzip sonar-scanner.zip
+
+#           # Move the sonar-scanner to /usr/local/bin for global access
+#           sudo mv sonar-scanner-4.9.0.2991-linux/bin/sonar-scanner /usr/local/bin/
+#           sudo mv sonar-scanner-4.9.0.2991-linux/conf/sonar-scanner.properties /usr/local/bin/
+#           sudo mv sonar-scanner-4.9.0.2991-linux/lib /usr/local/lib/sonar-scanner
+
+#       - name: Run SonarQube Scan
+#         env:
+#           SONAR_TOKEN: ${{ secrets.SONAR_CUBE }}  # Your secret token
+#         run: |
+#           sonar-scanner \
+#             -Dsonar.projectKey=devops \
+#             -Dsonar.sources=. \
+#             -Dsonar.host.url=http://localhost:9000 \
+#             -Dsonar.login=$SONAR_CUBE
