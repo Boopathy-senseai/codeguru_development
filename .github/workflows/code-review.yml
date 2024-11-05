@@ -1,5 +1,4 @@
 name: Post flake8 Report
-
 on:
   pull_request:
     types: [opened, synchronize]
