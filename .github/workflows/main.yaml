@@ -45,6 +45,7 @@ jobs:
 
       # Step 4: Check for SARIF Results and Prepare Comment
       - name: Prepare SARIF Findings and Feedback
+        id: prepare_comment
         if: always()
         run: |
           if [ -f codeguru-security-results.sarif.json ]; then
@@ -54,6 +55,7 @@ jobs:
               if [ -n "$COMMENT_CONTENT" ]; then
                 echo "### CodeGuru Security Analysis Results" > comment.md
                 echo "$COMMENT_CONTENT" >> comment.md
+                echo "comment-prepared=true" >> $GITHUB_ENV
                 echo "Findings prepared for comment."
               else
                 echo "No critical or warning findings detected in the analysis."
@@ -63,12 +65,13 @@ jobs:
             fi
           else
             echo "No SARIF file found; ensure the CodeGuru analysis ran properly."
+            echo "comment-prepared=false" >> $GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Step 5: Create or Update PR Comment
       - name: Create or Update PR Comment
-        if: success() && github.event_name == 'pull_request' && (test -f comment.md)
+        if: env.comment-prepared == 'true' && github.event_name == 'pull_request'
         uses: peter-evans/create-or-update-comment@v2
         with:
           issue-number: ${{ github.event.pull_request.number }}
