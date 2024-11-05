@@ -1,36 +1,27 @@
-name: Code Review
+name: Post flake8 Report
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
-
-permissions:
-  issues: write  # Allows writing comments to issues and pull requests
+    types: [opened, synchronize]
 
 jobs:
-  analyze:
+  post-flake8-report:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      - name: Install Python and flake8
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.8'  # Specify your Python version
+          python-version: '3.8'
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
           pip install flake8
+          flake8 . --output-file=flake8-report.json || true
 
-      - name: Run flake8
-        id: flake8
-        run: |
-          flake8 . --format=json > flake8-report.json || true
-
-      - name: Comment on Pull Request
+      - name: Comment on PR with flake8 report
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
