@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  issues: write  # Allows writing comments to issues
+  pull_requests: write  # Allows writing comments to pull requests
+
 jobs:
   analyze:
     runs-on: ubuntu-latest
