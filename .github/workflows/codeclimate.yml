@@ -1,10 +1,7 @@
 name: CodeClimate Analysis
 
-on:
+on: 
   push:
-    branches:
-      - main
-  pull_request:
     branches:
       - main
 
@@ -13,33 +10,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v2
         with:
-          python-version: '3.8'  # Change to your project's Python version
+          python-version: '3.8'  # Adjust the version as needed
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt  # Install your project dependencies
+          pip install -r requirements.txt
 
-      - name: Install CodeClimate CLI
+      - name: Download CodeClimate CLI
         run: |
-          curl -L -o codeclimate https://github.com/codeclimate/codeclimate/releases/latest/download/codeclimate-linux-amd64
-          if [[ "$(file codeclimate)" != *"executable"* ]]; then echo "Downloaded file is not executable"; exit 1; fi
+          response=$(curl -L -w "%{http_code}" -o codeclimate https://github.com/codeclimate/codeclimate/releases/latest/download/codeclimate-linux-amd64)
+          if [ "$response" -ne 200 ]; then
+            echo "Failed to download CodeClimate CLI. HTTP status code: $response"
+            exit 1
+          fi
+          # Check if the downloaded file size is reasonable
+          if [ ! -s codeclimate ] || [ "$(wc -c <codeclimate)" -lt 100 ]; then
+            echo "Downloaded file is too small or empty. Exiting."
+            exit 1
+          fi
+          # Check file type
+          if [[ "$(file codeclimate)" != *"executable"* ]]; then
+            echo "Downloaded file is not executable. File type is: $(file codeclimate)"
+            cat codeclimate  # Display the content for debugging
+            exit 1
+          fi
           chmod +x codeclimate  # Make it executable
           sudo mv codeclimate /usr/local/bin/  # Move to bin directory
 
-      - name: Verify CodeClimate CLI
-        run: |
-          file /usr/local/bin/codeclimate  # Check if it's a valid executable
-          ls -l /usr/local/bin/codeclimate  # List the details of the file
-          if [ ! -s /usr/local/bin/codeclimate ]; then echo "Downloaded file is empty."; exit 1; fi
-          if ! command -v codeclimate &> /dev/null; then echo "CodeClimate CLI not found in PATH"; exit 1; fi
-
-      - name: Run CodeClimate analysis
-        env:
-          CODECLIMATE_REPO_TOKEN: ${{ secrets.CODECLIMATE_REPO_TOKEN }}  # Ensure this secret is set correctly
+      - name: Run CodeClimate Analysis
         run: |
           codeclimate analyze  # Run the analysis
