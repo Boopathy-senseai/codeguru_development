@@ -37,6 +37,6 @@ jobs:
 
       - name: Run CodeClimate analysis
         env:
-          CODECLIMATE_REPO_TOKEN: ${{ secrets.CODECLIMATE_REPO_TOKEN }}
+          CODECLIMATE_REPO_TOKEN: ${{ secrets.CODECLIMATE }}
         run: |
           codeclimate analyze  # Run the analysis
