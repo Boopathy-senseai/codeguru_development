@@ -1,0 +1,30 @@
+name: Reviewdog Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  reviewdog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      
+      # Install the required linter or code analysis tool
+      - name: Install dependencies
+        run: |
+          npm install  # Example for JavaScript projects; change as needed
+      
+      # Run the linter and save output
+      - name: Run linter (ESLint example)
+        run: |
+          npx eslint . --format=json > eslint-report.json || true  # Avoid failing the action
+
+      # Run Reviewdog with the linter output
+      - name: Run Reviewdog
+        uses: reviewdog/action-eslint@v1
+        with:
+          reporter: github-pr-review
+          level: error  # Options: info, warning, error
+          filter_mode: file  # Only show issues in files changed in the pull request
