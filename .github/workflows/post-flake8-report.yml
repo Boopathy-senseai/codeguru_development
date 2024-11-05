@@ -83,8 +83,10 @@ jobs:
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             base_commit="${{ github.event.before }}"
           else
-            base_commit="HEAD^"  # Compare against the previous commit
+            base_commit="$(git rev-parse HEAD^)"  # Reference the previous commit
           fi
+          
+          echo "Base commit: $base_commit"
           
           # Get the list of changed files
           files=$(git diff --name-only $base_commit ${{ github.sha }})
