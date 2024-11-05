@@ -5,6 +5,7 @@ drug = [54, 73, 53, 70, 73, 68, 52, 65, 65]
 placebo = [54, 51, 58, 44, 55, 52, 42, 47, 58, 46]
 observed_diff = mean(drug) - mean(placebo)
 
+
 n = 10_000
 count = 0
 combined = drug + placebo
