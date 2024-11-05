@@ -5,8 +5,7 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
-  issues: write  # Allows writing comments to issues
-  pull_requests: write  # Allows writing comments to pull requests
+  issues: write  # Allows writing comments to issues and pull requests
 
 jobs:
   analyze:
