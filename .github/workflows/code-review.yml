@@ -1,0 +1,39 @@
+name: Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'  # Specify your Python version
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
+
+      - name: Run flake8
+        id: flake8
+        run: |
+          flake8 . --format=json > flake8-report.json || true
+
+      - name: Comment on Pull Request
+        uses: peter-evans/comment-pr@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_number: ${{ github.event.pull_request.number }}
+          body: |
+            ### flake8 Report
+            ```json
+            $(cat flake8-report.json)
+            ```
