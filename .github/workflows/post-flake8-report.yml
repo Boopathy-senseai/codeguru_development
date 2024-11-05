@@ -1,3 +1,51 @@
+# name: Post flake8 Report
+
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     branches:
+#       - main
+
+# permissions:
+#   issues: write
+#   pull-requests: write  # Corrected to pull-requests (with a hyphen)
+
+# jobs:
+#   post-flake8-report:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+
+#       - name: Install Python and flake8
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: '3.8'
+
+#       - name: Install dependencies
+#         run: |
+#           pip install flake8
+#           flake8 . --output-file=flake8-report.json || true
+
+#       - name: Debug Event Context
+#         run: echo "${{ toJson(github.event) }}"
+
+#       - name: Comment on PR with flake8 report
+#         uses: actions/github-script@v6
+#         with:
+#           github-token: ${{ secrets.GITHUB_TOKEN }}
+#           script: |
+#             const fs = require('fs');
+#             const report = fs.readFileSync('flake8-report.json', 'utf-8');
+#             const commentBody = `### flake8 Report\n\`\`\`json\n${report}\n\`\`\``;
+
+#             await github.rest.issues.createComment({
+#               ...context.repo,
+#               issue_number: context.payload.pull_request.number,
+#               body: commentBody,
+#             });
 name: Post flake8 Report
 
 on:
@@ -10,7 +58,7 @@ on:
 
 permissions:
   issues: write
-  pull-requests: write  # Corrected to pull-requests (with a hyphen)
+  pull-requests: write
 
 jobs:
   post-flake8-report:
@@ -27,7 +75,19 @@ jobs:
       - name: Install dependencies
         run: |
           pip install flake8
-          flake8 . --output-file=flake8-report.json || true
+
+      - name: Get changed files
+        id: get_changed_files
+        run: |
+          echo "::set-output name=files::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})"
+
+      - name: Run flake8 on changed files
+        run: |
+          if [ -z "${{ steps.get_changed_files.outputs.files }}" ]; then
+            echo "No changes detected."
+          else
+            flake8 ${{ steps.get_changed_files.outputs.files }} --output-file=flake8-report.json || true
+          fi
 
       - name: Debug Event Context
         run: echo "${{ toJson(github.event) }}"
