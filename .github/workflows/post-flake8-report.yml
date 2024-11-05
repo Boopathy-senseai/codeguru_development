@@ -3,7 +3,6 @@ name: Post flake8 Report
 on:
   pull_request:
     types: [opened, synchronize]
-  workflow_dispatch: # Allows for manual triggering
 
 jobs:
   post-flake8-report:
@@ -25,7 +24,7 @@ jobs:
           pip install flake8
           flake8 . --output-file=flake8-report.json || true
 
-      - name: Debug Event Payload
+      - name: Debug Event Context
         run: echo "${{ toJson(github.event) }}"
 
       - name: Comment on PR with flake8 report
