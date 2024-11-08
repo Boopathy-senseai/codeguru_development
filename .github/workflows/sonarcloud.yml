@@ -12,57 +12,49 @@ jobs:
   sonarcloud:
     runs-on: ubuntu-latest
     steps:
+      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Set up JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
           java-version: '17'
           distribution: 'temurin'
 
+      # Step 3: Verify Java version
       - name: Verify Java version
         run: java -version
 
+      # Step 4: Install SonarScanner
       - name: Install SonarScanner
         run: |
-          # Install dependencies
           sudo apt-get update
           sudo apt-get install -y unzip wget
-
-          # Download and install SonarScanner
           wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
           unzip sonar-scanner-cli-4.6.2.2472-linux.zip
           sudo mv sonar-scanner-4.6.2.2472-linux /usr/local/sonar-scanner
+          echo "/usr/local/sonar-scanner/bin" >> $GITHUB_PATH
 
-          # Add SonarScanner to the PATH for all future steps
-          echo "PATH=/usr/local/sonar-scanner/bin:$PATH" >> $GITHUB_ENV
-
+      # Step 5: Verify SonarScanner installation
       - name: Verify SonarScanner installation
-        run: |
-          # Ensure sonar-scanner is in PATH and verify installation
-          sonar-scanner -v
+        run: sonar-scanner -v
 
+      # Step 6: Set up environment variables for Java and SonarScanner
       - name: Set JAVA_HOME for SonarScanner
         run: |
           export JAVA_HOME=/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.13-11/x64
-          export PATH=$JAVA_HOME/bin:$PATH
-          java -version
+          echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
+          echo "SONAR_SCANNER_OPTS=-Djava.home=$JAVA_HOME" >> $GITHUB_ENV
 
-          # Set SonarScanner options to use Java 17
-          export SONAR_SCANNER_OPTS="-Djava.home=$JAVA_HOME"
-
+      # Step 7: Run SonarScanner analysis with authentication token
       - name: Run SonarScanner
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          # Debugging: Print environment variables and check for missing properties
-          echo "SonarScanner Environment Variables:"
-          export JAVA_HOME=/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.13-11/x64
-          export PATH=$JAVA_HOME/bin:$PATH
-          export SONAR_SCANNER_OPTS="-Djava.home=$JAVA_HOME"
-
-          
-          # Run SonarScanner with debug option
           sonar-scanner -X \
             -Dsonar.projectKey=Boopathy-senseai_codeguru_development \
             -Dsonar.organization=boopathy-senseai \
-            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=$SONAR_TOKEN
