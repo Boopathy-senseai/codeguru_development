@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the code from the repository
+      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -23,29 +23,18 @@ jobs:
         with:
           java-version: 17
           distribution: temurin
-          java-package: jdk
 
-      # Step 3: Verify Java version (Optional)
-      - name: Verify Java version
-        run: java -version
-
-      # Step 4: Cache Maven dependencies
-      - name: Cache Maven dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-
-
-      # Step 6: SonarCloud analysis
-      - name: SonarCloud Scan
+      # Step 3: SonarCloud Scan
+      - name: SonarCloud Analysis
         uses: SonarSource/sonarcloud-github-action@v2
         with:
-          args: -Dsonar.projectKey=Boopathy-senseai_codeguru_development -Dsonar.organization=boopathy-senseai -Dsonar.host.url=https://sonarcloud.io -Dsonar.sources=.
+          args: |
+            -Dsonar.projectKey=Boopathy-senseai_codeguru_development
+            -Dsonar.organization=boopathy-senseai
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.sources=.
+            -Dsonar.projectBaseDir=.
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.13-11/x64
           JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.13-11/x64
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
