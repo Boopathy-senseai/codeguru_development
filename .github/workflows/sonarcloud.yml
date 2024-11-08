@@ -52,8 +52,16 @@ jobs:
           # Set SonarScanner options to use Java 17
           export SONAR_SCANNER_OPTS="-Djava.home=$JAVA_HOME"
 
-          # Run SonarScanner for the project
-          sonar-scanner \
+      - name: Run SonarScanner
+        run: |
+          # Debugging: Print environment variables and check for missing properties
+          echo "SonarScanner Environment Variables:"
+          echo "JAVA_HOME: $JAVA_HOME"
+          echo "PATH: $PATH"
+          echo "SONAR_SCANNER_OPTS: $SONAR_SCANNER_OPTS"
+          
+          # Run SonarScanner with debug option
+          sonar-scanner -X \
             -Dsonar.projectKey=Boopathy-senseai_codeguru_development \
             -Dsonar.organization=boopathy-senseai \
             -Dsonar.host.url=https://sonarcloud.io
