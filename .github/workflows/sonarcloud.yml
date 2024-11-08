@@ -23,7 +23,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Step 3: SonarCloud Scan using SonarSource Action
+      # Step 3: Set SONAR_SCANNER_OPTS to use Java 17
+      - name: Set SONAR_SCANNER_OPTS
+        run: echo "SONAR_SCANNER_OPTS=-Djava.home=${{ steps.setup_java.outputs.path }}" >> $GITHUB_ENV
+
+      # Step 4: SonarCloud Scan using SonarSource Action
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v1
         env:
