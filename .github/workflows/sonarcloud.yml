@@ -36,12 +36,13 @@ jobs:
           unzip sonar-scanner-cli-4.6.2.2472-linux.zip
           sudo mv sonar-scanner-4.6.2.2472-linux /usr/local/sonar-scanner
 
-      - name: Force Java 17 for SonarScanner
+      - name: Force Java 17 for SonarScanner execution
         run: |
           export JAVA_HOME=/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.2-8/x64
           export PATH=$JAVA_HOME/bin:$PATH
           java -version
-          export PATH="/usr/local/sonar-scanner/bin:$PATH"
+          # Ensure sonar-scanner uses Java 17 by explicitly setting the Java version before running
+          export SONAR_SCANNER_OPTS="-Djava.home=$JAVA_HOME"
           sonar-scanner \
             -Dsonar.projectKey=Boopathy-senseai_codeguru_development \
             -Dsonar.organization=boopathy-senseai \
