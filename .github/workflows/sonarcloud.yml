@@ -1,4 +1,4 @@
-name: SonarCloud
+name: SonarCloud Analysis
 
 on:
   push:
@@ -26,25 +26,33 @@ jobs:
 
       - name: Install SonarScanner
         run: |
-          # Install dependencies and download SonarScanner
+          # Install dependencies
           sudo apt-get update
           sudo apt-get install -y unzip wget
+          
+          # Download and install SonarScanner
           wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
           unzip sonar-scanner-cli-4.6.2.2472-linux.zip
           sudo mv sonar-scanner-4.6.2.2472-linux /usr/local/sonar-scanner
-          echo "SonarScanner installed at /usr/local/sonar-scanner"
 
-      - name: Add SonarScanner to PATH in the current shell
+          # Add SonarScanner to PATH
+          echo "export PATH=/usr/local/sonar-scanner/bin:$PATH" >> ~/.bashrc
+          source ~/.bashrc
+
+      - name: Verify SonarScanner installation
         run: |
-          export PATH=/usr/local/sonar-scanner/bin:$PATH
-          sonar-scanner -v  # Check if sonar-scanner is installed and working
+          sonar-scanner -v
 
-      - name: Force Java 17 for SonarScanner execution
+      - name: Set JAVA_HOME for SonarScanner
         run: |
           export JAVA_HOME=/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.2-8/x64
           export PATH=$JAVA_HOME/bin:$PATH
           java -version
+          
+          # Set SonarScanner options to use Java 17
           export SONAR_SCANNER_OPTS="-Djava.home=$JAVA_HOME"
+          
+          # Run SonarScanner for the project
           sonar-scanner \
             -Dsonar.projectKey=Boopathy-senseai_codeguru_development \
             -Dsonar.organization=boopathy-senseai \
