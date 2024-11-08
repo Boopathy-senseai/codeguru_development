@@ -11,30 +11,35 @@ on:
 jobs:
   sonarcloud:
     runs-on: ubuntu-latest
+
     steps:
-      # Step 1: Checkout code
-      - name: Checkout code
+      - name: Check out the code
         uses: actions/checkout@v3
 
-      # Step 2: Set up JDK 17
-      - name: Set up JDK 17
+      # Set up Node.js for compatibility
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      # Set up Java version compatible with SonarScanner
+      - name: Set up Java
         uses: actions/setup-java@v2
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: '17'  # Change to match your project requirements
+          distribution: 'adopt'
 
-      # Step 3: Set SONAR_SCANNER_OPTS to use Java 17
-      - name: Set SONAR_SCANNER_OPTS
-        run: echo "SONAR_SCANNER_OPTS=-Djava.home=${{ steps.setup_java.outputs.path }}" >> $GITHUB_ENV
+      # Install SonarCloud Scanner dependencies
+      - name: Install SonarCloud Scanner dependencies
+        run: npm install
 
-      # Step 4: SonarCloud Scan using SonarSource Action
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v1
+      # Run SonarCloud scan with debugging
+      - name: Run SonarCloud scan
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: |
-            -Dsonar.projectKey=Boopathy-senseai_codeguru_development
-            -Dsonar.organization=boopathy-senseai
-            -Dsonar.host.url=https://sonarcloud.io
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # Make sure to set this in your GitHub secrets
+        run: |
+          sonar-scanner -X \
+            -Dsonar.projectKey=Boopathy-senseai_codeguru_development \
+            -Dsonar.organization=boopathy-senseai \
+            -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.sources=.
