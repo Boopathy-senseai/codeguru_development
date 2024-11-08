@@ -26,15 +26,18 @@ jobs:
 
       - name: Install SonarScanner
         run: |
-          # Download and extract SonarScanner
+          # Install dependencies and download SonarScanner
+          sudo apt-get update
+          sudo apt-get install -y unzip wget
           wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
           unzip sonar-scanner-cli-4.6.2.2472-linux.zip
           sudo mv sonar-scanner-4.6.2.2472-linux /usr/local/sonar-scanner
-          echo "SonarScanner installed"
+          echo "SonarScanner installed at /usr/local/sonar-scanner"
 
-      - name: Add SonarScanner to PATH for current session
+      - name: Add SonarScanner to PATH
         run: |
-          export PATH=/usr/local/sonar-scanner/bin:$PATH
+          echo "export PATH=/usr/local/sonar-scanner/bin:$PATH" >> ~/.bashrc
+          source ~/.bashrc
           sonar-scanner -v
 
       - name: Force Java 17 for SonarScanner execution
