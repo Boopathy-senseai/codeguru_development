@@ -56,9 +56,10 @@ jobs:
         run: |
           # Debugging: Print environment variables and check for missing properties
           echo "SonarScanner Environment Variables:"
-          echo "JAVA_HOME: $JAVA_HOME"
-          echo "PATH: $PATH"
-          echo "SONAR_SCANNER_OPTS: $SONAR_SCANNER_OPTS"
+          export JAVA_HOME=/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.13-11/x64
+          export PATH=$JAVA_HOME/bin:$PATH
+          export SONAR_SCANNER_OPTS="-Djava.home=$JAVA_HOME"
+
           
           # Run SonarScanner with debug option
           sonar-scanner -X \
