@@ -21,6 +21,9 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Verify Java version
+        run: java -version
+
       - name: Cache SonarCloud packages
         uses: actions/cache@v2
         with:
@@ -36,7 +39,12 @@ jobs:
       - name: SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.2-8/x64
         run: |
+          # Verify Java version to make sure we are using Java 17
+          java -version
+          
+          # Update PATH and run sonar-scanner
           export PATH="/usr/local/sonar-scanner/bin:$PATH"
           sonar-scanner \
             -Dsonar.projectKey=Boopathy-senseai_codeguru_development \
