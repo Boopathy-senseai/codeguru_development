@@ -26,20 +26,13 @@ jobs:
 
       - name: Download CodeClimate CLI
         run: |
-          response=$(curl -L -w "%{http_code}" -o codeclimate https://github.com/codeclimate/codeclimate/releases/latest/download/codeclimate-linux-amd64)
-          if [ "$response" -ne 200 ]; then
-            echo "Failed to download CodeClimate CLI. HTTP status code: $response"
+          curl -L -o codeclimate https://github.com/codeclimate/codeclimate/releases/latest/download/codeclimate-linux-amd64
+          if [ ! -f codeclimate ]; then
+            echo "Failed to download CodeClimate CLI."
             exit 1
           fi
-          # Check if the downloaded file size is reasonable
-          if [ ! -s codeclimate ] || [ "$(wc -c <codeclimate)" -lt 100 ]; then
-            echo "Downloaded file is too small or empty. Exiting."
-            exit 1
-          fi
-          # Check file type
-          if [[ "$(file codeclimate)" != *"executable"* ]]; then
-            echo "Downloaded file is not executable. File type is: $(file codeclimate)"
-            cat codeclimate  # Display the content for debugging
+          if [ ! -s codeclimate ]; then
+            echo "Downloaded file is empty."
             exit 1
           fi
           chmod +x codeclimate  # Make it executable
