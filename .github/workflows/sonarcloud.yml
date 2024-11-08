@@ -35,11 +35,12 @@ jobs:
           unzip sonar-scanner-cli-4.6.2.2472-linux.zip
           # Move it to /usr/local so it's available on the PATH
           sudo mv sonar-scanner-4.6.2.2472-linux /usr/local/sonar-scanner
-          # Add Sonar Scanner to PATH
-          echo "export PATH=/usr/local/sonar-scanner/bin:\$PATH" >> $GITHUB_ENV
 
       - name: SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          # Add Sonar Scanner to PATH within this session
+          export PATH="/usr/local/sonar-scanner/bin:$PATH"
+          # Run the Sonar Scanner command
           sonar-scanner -Dsonar.projectKey=Boopathy-senseai_codeguru_development -Dsonar.organization=boopathy-senseai
