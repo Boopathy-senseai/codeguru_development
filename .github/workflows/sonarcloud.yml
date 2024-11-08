@@ -38,9 +38,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      # Step 5: Build the project (adjust according to your build tool)
-      - name: Build with Maven
-        run: mvn clean install
+
 
       # Step 6: SonarCloud analysis
       - name: SonarCloud Scan
