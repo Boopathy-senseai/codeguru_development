@@ -36,8 +36,7 @@ jobs:
           sudo mv sonar-scanner-4.6.2.2472-linux /usr/local/sonar-scanner
 
           # Add SonarScanner to PATH
-          echo "export PATH=/usr/local/sonar-scanner/bin:$PATH" >> ~/.bashrc
-          source ~/.bashrc
+          echo "export PATH=/usr/local/sonar-scanner/bin:$PATH" >> $GITHUB_ENV
 
       - name: Verify SonarScanner installation
         run: |
