@@ -23,38 +23,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Step 3: Verify Java version
-      - name: Verify Java version
-        run: java -version
-
-      # Step 4: Install SonarScanner
-      - name: Install SonarScanner
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y unzip wget
-          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
-          unzip sonar-scanner-cli-4.6.2.2472-linux.zip
-          sudo mv sonar-scanner-4.6.2.2472-linux /usr/local/sonar-scanner
-          echo "/usr/local/sonar-scanner/bin" >> $GITHUB_PATH
-
-      # Step 5: Verify SonarScanner installation
-      - name: Verify SonarScanner installation
-        run: sonar-scanner -v
-
-      # Step 6: Set up environment variables for Java and SonarScanner
-      - name: Set JAVA_HOME for SonarScanner
-        run: |
-          export JAVA_HOME=/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.13-11/x64
-          echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
-          echo "SONAR_SCANNER_OPTS=-Djava.home=$JAVA_HOME" >> $GITHUB_ENV
-
-      # Step 7: Run SonarScanner analysis with authentication token
-      - name: Run SonarScanner
+      # Step 3: SonarCloud Scan using SonarSource Action
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v1
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          sonar-scanner -X \
-            -Dsonar.projectKey=Boopathy-senseai_codeguru_development \
-            -Dsonar.organization=boopathy-senseai \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=$SONAR_TOKEN
+        with:
+          args: |
+            -Dsonar.projectKey=Boopathy-senseai_codeguru_development
+            -Dsonar.organization=boopathy-senseai
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.sources=.
