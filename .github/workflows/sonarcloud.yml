@@ -11,6 +11,7 @@ on:
 jobs:
   sonarcloud:
     runs-on: ubuntu-latest
+
     steps:
       # Step 1: Checkout code
       - name: Checkout code
@@ -23,8 +24,8 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Step 3: SonarCloud Scan using SonarSource Action
-      - name: SonarCloud Scan
+      # Step 3: Run SonarCloud Scan
+      - name: Run SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v1
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
