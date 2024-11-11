@@ -40,9 +40,9 @@
 name: SonarCloud Analysis
 
 on:
-  push:
+  pull_request:
     branches:
-      - main
+      - '**'
 
 jobs:
   sonarcloud:
