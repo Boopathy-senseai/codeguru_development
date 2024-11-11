@@ -8,7 +8,8 @@ class ApiView(generics.GenericAPIView):
     def get(self, request):
         data = {
             'name': 'Boopathy',
-            'role': 'backend developer'
+            'role': 'backend developer',
+            'org':'Sense7ai'
         }
         print(data,'************')
 
